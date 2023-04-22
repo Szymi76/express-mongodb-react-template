@@ -4,7 +4,7 @@ import { router } from "../app/api/rootRouter";
 import jwtDecode from "jwt-decode";
 
 /**
- * @description Provider zajmuję się odebraniem objektu użytkownika z local storage,
+ * Provider zajmuję się odebraniem objektu użytkownika z local storage,
  * natomiast jeśli accesss token jest już nie ważny to zostaje wywołana
  * funkcja do odświeżenia tokenu TYLKO jeśli refresh token znajduje się w local storage
  */
@@ -29,7 +29,14 @@ export const AuthProvider = ({ children }) => {
       const isRefreshRequired = +expires_at < nowInSeconds;
 
       // jeśli refresh jest wymagany to zostaje wywołana funkcja 'auth.refresh'
-      if (isRefreshRequired) router.auth.refresh();
+      if (isRefreshRequired)
+        router.auth
+          .refresh()
+          // w przypadku udanego refresha ładowanie zostaje zakończone
+          .then(() => useAuth.setState({ isLoading: false }))
+
+          // w przypadku błędu użytkownik jest wylogowywany
+          .catch(() => useAuth.getState().logout());
       // w innym przypadku odbieramy objekt użytkownika z access tokena
       // i aktualizujemy useAuth currentUser state
       else {
@@ -43,5 +50,5 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  return <div>{children}</div>;
+  return children;
 };

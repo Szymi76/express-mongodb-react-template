@@ -2,18 +2,8 @@ import { api } from "..";
 
 export const authRouter = {
   /**
-   * @GET
-   * @param {string} userId - id użytkownika
-   * @returns Zwraca objekt użytkownika lub `null` w przypadku braku znalezienia.
-   */
-  getUserById: async (userId) => {
-    const response = await api.get(`/auth/user/${userId}`);
-    return response?.data?.user ?? null;
-  },
-
-  /**
    * @POST
-   * @description Zamienia `refresh_token` na `access_token` jeśli znajduje się w localStorage,
+   * Zamienia `refresh_token` na `access_token` jeśli znajduje się w localStorage,
    * w innym przypadku zapytanie się nie wykonuje.
    */
   refresh: async () => {
@@ -23,9 +13,7 @@ export const authRouter = {
 
   /**
    * @POST
-   * @param {string} email
-   * @param {string} password
-   * @returns Zwraca użytkownika, access i refresh roken oraz date wygaśnięcia access tokena.
+   * Zwraca użytkownika, access i refresh roken oraz date wygaśnięcia access tokena.
    */
   login: async (email, password) => {
     const response = await api.post("/auth/login", { email, password });
@@ -34,14 +22,9 @@ export const authRouter = {
 
   /**
    * @POST
-   * @param {string} name
-   * @param {string} email
-   * @param {string} password
-   * @param {object} optional
-   * @returns Zwraca użytkownika, access i refresh roken oraz date wygaśnięcia access tokena.
+   * Zwraca użytkownika, access i refresh roken oraz date wygaśnięcia access tokena.
    */
-  register: async (name, email, password, optional) => {
-    const avatarUrl = optional?.avatarUrl ?? undefined;
+  register: async (name, email, password, avatarUrl) => {
     const response = await api.post("/auth/register", { name, email, password, avatarUrl });
     return response.data;
   },

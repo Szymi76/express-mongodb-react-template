@@ -66,7 +66,7 @@ api.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${new_access_token}`;
         return api(originalRequest);
       });
-    } else useAuth.getState().logout();
+    } else if (!isFirstRetry) useAuth.getState().logout();
 
     return Promise.reject(error);
   }

@@ -1,20 +1,29 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { router } from "../app/api/rootRouter";
 import { useAuth } from "../app/store/useAuth";
 import { Oval } from "react-loader-spinner";
 import { useState } from "react";
+import { useCountdown } from "../hooks/useCountdown";
 import styled from "styled-components";
 
 const Home = () => {
-  const { isLoading } = useAuth();
+  const { currentUser, isLoading } = useAuth();
 
   if (isLoading) return <LoadingPage />;
 
   return (
     <Wrapper>
-      <UserDetails />
-      <LoginForm />
-      <RegisterForm />
+      {currentUser ? (
+        <>
+          <UserDetails />
+          <GetUserById />
+        </>
+      ) : (
+        <>
+          <LoginForm />
+          <RegisterForm />
+        </>
+      )}
     </Wrapper>
   );
 };
@@ -22,7 +31,6 @@ const Home = () => {
 export default Home;
 
 const LoginForm = () => {
-  const { currentUser } = useAuth();
   const [data, setData] = useState({ email: "", password: "" });
   const {
     mutateAsync: login,
@@ -33,12 +41,14 @@ const LoginForm = () => {
   });
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const { email, password } = data;
-    await login({ email, password });
+    try {
+      e.preventDefault();
+      const { email, password } = data;
+      await login({ email, password });
+    } catch (err) {
+      console.warn("Coś poszło nie tak podczas logowania");
+    }
   };
-
-  if (currentUser) return <></>;
 
   return (
     <Form onSubmit={handleSubmit}>
@@ -68,7 +78,6 @@ const LoginForm = () => {
 };
 
 const RegisterForm = () => {
-  const { currentUser } = useAuth();
   const [data, setData] = useState({ name: "", email: "", password: "", passwordRepeat: "" });
   const {
     mutateAsync: register,
@@ -84,8 +93,6 @@ const RegisterForm = () => {
     if (password != passwordRepeat) return;
     await register({ name, email, password });
   };
-
-  if (currentUser) return <></>;
 
   return (
     <Form onSubmit={handleSubmit}>
@@ -132,13 +139,53 @@ const RegisterForm = () => {
 const UserDetails = () => {
   const { currentUser, logout } = useAuth();
 
-  if (!currentUser) return <></>;
+  const expires_at = +localStorage.getItem("expires_at") ?? "";
+  const nowInSeconds = +(new Date().getTime() / 1000).toFixed();
+  const countdown = useCountdown(expires_at - nowInSeconds);
 
   return (
     <Form>
       <PrimaryText>{currentUser.name}</PrimaryText>
       <SecondaryText>{currentUser.email}</SecondaryText>
       <Button onClick={logout}>Wyloguj się</Button>
+      {countdown > 0 ? <Label>Access token wygaśnie za: {countdown}</Label> : <Label>Access token wygasł!</Label>}
+    </Form>
+  );
+};
+
+const GetUserById = () => {
+  const [someUserId, setSomeUserId] = useState("644179e541de4d678f6a65a2");
+
+  const {
+    data: someUser,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ["get-user-by-id"],
+    queryFn: () => router.user.getUserById(someUserId),
+  });
+
+  return (
+    <Form>
+      <Label>Wyszukaj użytkownika po jego id</Label>
+      <TextInput
+        type="text"
+        value={someUserId}
+        onChange={(e) => setSomeUserId(e.target.value)}
+        placeholder="np. 644179e541de4d678f6a65a2"
+      />
+      <Button type="button" onClick={refetch}>
+        Szukaj
+      </Button>
+      {isLoading && <SmallLoading />}
+      {isError && <ErrorText>Brak użytkownika o takim id</ErrorText>}
+      {someUser && !isError && (
+        <>
+          <PrimaryText style={{ marginTop: "2rem" }}>{someUser.name}</PrimaryText>
+          <SecondaryText>{someUser.email}</SecondaryText>
+        </>
+      )}
     </Form>
   );
 };

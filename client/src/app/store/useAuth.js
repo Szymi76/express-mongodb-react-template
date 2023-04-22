@@ -22,9 +22,9 @@ export const useAuth = create((set, get) => ({
     }
   },
   /**
-   * Czyści wszystkie state i usuwa tokeny z localStorage
+   * Czyści wszystkie state i usuwa tokeny z local storage
    */
-  logout: async () => {
+  logout: () => {
     set({ currentUser: null, isLoading: false });
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
