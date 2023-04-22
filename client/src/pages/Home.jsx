@@ -1,0 +1,241 @@
+import { useMutation } from "@tanstack/react-query";
+import { router } from "../app/api/rootRouter";
+import { useAuth } from "../app/store/useAuth";
+import { Oval } from "react-loader-spinner";
+import { useState } from "react";
+import styled from "styled-components";
+
+const Home = () => {
+  const { isLoading } = useAuth();
+
+  if (isLoading) return <LoadingPage />;
+
+  return (
+    <Wrapper>
+      <UserDetails />
+      <LoginForm />
+      <RegisterForm />
+    </Wrapper>
+  );
+};
+
+export default Home;
+
+const LoginForm = () => {
+  const { currentUser } = useAuth();
+  const [data, setData] = useState({ email: "", password: "" });
+  const {
+    mutateAsync: login,
+    isLoading,
+    isError,
+  } = useMutation({
+    mutationFn: ({ email, password }) => router.auth.login(email, password),
+  });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const { email, password } = data;
+    await login({ email, password });
+  };
+
+  if (currentUser) return <></>;
+
+  return (
+    <Form onSubmit={handleSubmit}>
+      <Title>Zaloguj się</Title>
+      {isError && <ErrorText>Coś poszło nie tak</ErrorText>}
+      <Label>Adres email</Label>
+      <TextInput
+        type="email"
+        required
+        value={data.email}
+        placeholder="np. michałszymczas12@gmail.com"
+        onChange={(e) => setData({ ...data, email: e.target.value })}
+      />
+      <Label>Hasło</Label>
+      <TextInput
+        type="password"
+        required
+        value={data.password}
+        onChange={(e) => setData({ ...data, password: e.target.value })}
+      />
+      <Button type="submit" disabled={isLoading}>
+        {isLoading && <SmallLoading />}
+        Dalej
+      </Button>
+    </Form>
+  );
+};
+
+const RegisterForm = () => {
+  const { currentUser } = useAuth();
+  const [data, setData] = useState({ name: "", email: "", password: "", passwordRepeat: "" });
+  const {
+    mutateAsync: register,
+    isLoading,
+    isError,
+  } = useMutation({
+    mutationFn: ({ name, email, password }) => router.auth.register(name, email, password),
+  });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const { name, email, password, passwordRepeat } = data;
+    if (password != passwordRepeat) return;
+    await register({ name, email, password });
+  };
+
+  if (currentUser) return <></>;
+
+  return (
+    <Form onSubmit={handleSubmit}>
+      <Title>Stwórz konto</Title>
+      {isError && <ErrorText>Coś poszło nie tak</ErrorText>}
+      <Label>Twoja nazwa</Label>
+      <TextInput
+        type="text"
+        required
+        value={data.name}
+        placeholder="np. michu22"
+        onChange={(e) => setData({ ...data, name: e.target.value })}
+      />
+      <Label>Adres email</Label>
+      <TextInput
+        type="email"
+        required
+        value={data.email}
+        placeholder="np. michałszymczas12@gmail.com"
+        onChange={(e) => setData({ ...data, email: e.target.value })}
+      />
+      <Label>Hasło</Label>
+      <TextInput
+        type="password"
+        required
+        value={data.password}
+        onChange={(e) => setData({ ...data, password: e.target.value })}
+      />
+      <Label>Powtórz hasło</Label>
+      <TextInput
+        type="password"
+        required
+        value={data.pa}
+        onChange={(e) => setData({ ...data, passwordRepeat: e.target.value })}
+      />
+      <Button type="submit" disabled={isLoading}>
+        {isLoading && <SmallLoading />}
+        Dalej
+      </Button>
+    </Form>
+  );
+};
+
+const UserDetails = () => {
+  const { currentUser, logout } = useAuth();
+
+  if (!currentUser) return <></>;
+
+  return (
+    <Form>
+      <PrimaryText>{currentUser.name}</PrimaryText>
+      <SecondaryText>{currentUser.email}</SecondaryText>
+      <Button onClick={logout}>Wyloguj się</Button>
+    </Form>
+  );
+};
+
+const LoadingPage = () => {
+  return (
+    <Wrapper>
+      <Oval color="#2563eb" secondaryColor="#2563eb" />
+    </Wrapper>
+  );
+};
+
+const SmallLoading = () => {
+  return <Oval color="white" secondaryColor="white" height={14} width={14} />;
+};
+
+const Wrapper = styled.main(({ theme }) => ({
+  height: "100vh",
+  width: "100%",
+  display: "flex",
+  flexWrap: "wrap",
+  gap: "30px",
+  justifyContent: "center",
+  alignItems: "start",
+  paddingTop: "8.5rem",
+  backgroundColor: theme.gray["50"],
+}));
+
+const Form = styled.form(({ theme }) => ({
+  backgroundColor: theme.secondary,
+  width: "95%",
+  maxWidth: "450px",
+  border: `1px solid ${theme.gray["200"]}`,
+  borderRadius: theme.rounded.md,
+  padding: theme.padding.lg,
+  display: "flex",
+  flexDirection: "column",
+}));
+
+const Button = styled.button(({ theme }) => ({
+  padding: theme.padding.md,
+  backgroundColor: theme.main,
+  color: theme.secondary,
+  border: "none",
+  borderRadius: theme.rounded.md,
+  transitionDuration: "125ms",
+  cursor: "pointer",
+  marginTop: "1rem",
+  display: "flex",
+  justifyContent: "center",
+  gap: ".75rem",
+  ":hover": {
+    scale: "97%",
+  },
+  ":active": {
+    scale: "92%",
+  },
+}));
+
+const PrimaryText = styled.h3(({ theme }) => ({
+  fontSize: "1.5em",
+  fontWeight: 500,
+}));
+
+const SecondaryText = styled.h3(({ theme }) => ({
+  fontSize: ".95em",
+  color: theme.gray["500"],
+  fontWeight: 400,
+}));
+
+const Label = styled.label(({ theme }) => ({
+  color: theme.gray["500"],
+  fontSize: ".8em",
+  textTransform: "uppercase",
+  marginBottom: ".25rem",
+  marginTop: "1rem",
+}));
+
+const TextInput = styled.input(({ theme }) => ({
+  border: `1px solid ${theme.gray["200"]}`,
+  borderRadius: theme.rounded.md,
+  padding: theme.padding.md,
+  outline: "none",
+  transitionDuration: "100ms",
+  ":focus": {
+    borderColor: theme.main,
+  },
+}));
+
+const Title = styled.h1(({ theme }) => ({
+  fontSize: "2em",
+  fontWeight: "bold",
+  marginBottom: "2rem",
+}));
+
+const ErrorText = styled.h5(({ theme }) => ({
+  fontSize: ".8em",
+  color: theme.text.error,
+  marginTop: "1rem",
+}));

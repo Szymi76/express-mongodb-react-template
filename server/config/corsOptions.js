@@ -1,3 +1,7 @@
+const loadDotenv = require('./loadDotenv')
+
+loadDotenv()
+
 module.exports = {
     origin: process.env.CLIENT_URL,
 }
