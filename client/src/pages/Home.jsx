@@ -5,11 +5,10 @@ import { Oval } from "react-loader-spinner";
 import { useState } from "react";
 import { useCountdown } from "../hooks/useCountdown";
 import styled from "styled-components";
+import { Link } from "react-router-dom";
 
 const Home = () => {
-  const { currentUser, isLoading } = useAuth();
-
-  if (isLoading) return <LoadingPage />;
+  const { currentUser } = useAuth();
 
   return (
     <Wrapper>
@@ -148,6 +147,7 @@ const UserDetails = () => {
       <PrimaryText>{currentUser.name}</PrimaryText>
       <SecondaryText>{currentUser.email}</SecondaryText>
       <Button onClick={logout}>Wyloguj się</Button>
+      <Link to="/tylko-dla-zalogowanych">Tylko dla zalogowanych</Link>
       {countdown > 0 ? <Label>Access token wygaśnie za: {countdown}</Label> : <Label>Access token wygasł!</Label>}
     </Form>
   );
@@ -190,28 +190,20 @@ const GetUserById = () => {
   );
 };
 
-const LoadingPage = () => {
-  return (
-    <Wrapper>
-      <Oval color="#2563eb" secondaryColor="#2563eb" />
-    </Wrapper>
-  );
-};
-
 const SmallLoading = () => {
   return <Oval color="white" secondaryColor="white" height={14} width={14} />;
 };
 
 const Wrapper = styled.main(({ theme }) => ({
-  height: "100vh",
-  width: "100%",
+  height: "100%",
+  // width: "100%",
   display: "flex",
   flexWrap: "wrap",
   gap: "30px",
   justifyContent: "center",
   alignItems: "start",
   paddingTop: "8.5rem",
-  backgroundColor: theme.gray["50"],
+  // backgroundColor: theme.gray["50"],
 }));
 
 const Form = styled.form(({ theme }) => ({
