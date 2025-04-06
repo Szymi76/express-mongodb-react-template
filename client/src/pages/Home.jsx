@@ -77,13 +77,19 @@ const LoginForm = () => {
 };
 
 const RegisterForm = () => {
-  const [data, setData] = useState({ name: "", email: "", password: "", passwordRepeat: "" });
+  const [data, setData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    passwordRepeat: "",
+  });
   const {
     mutateAsync: register,
     isLoading,
     isError,
   } = useMutation({
-    mutationFn: ({ name, email, password }) => router.auth.register(name, email, password),
+    mutationFn: ({ name, email, password }) =>
+      router.auth.register(name, email, password),
   });
 
   const handleSubmit = async (e) => {
@@ -148,13 +154,17 @@ const UserDetails = () => {
       <SecondaryText>{currentUser.email}</SecondaryText>
       <Button onClick={logout}>Wyloguj się</Button>
       <Link to="/tylko-dla-zalogowanych">Tylko dla zalogowanych</Link>
-      {countdown > 0 ? <Label>Access token wygaśnie za: {countdown}</Label> : <Label>Access token wygasł!</Label>}
+      {countdown > 0 ? (
+        <Label>Access token wygaśnie za: {countdown}</Label>
+      ) : (
+        <Label>Access token wygasł!</Label>
+      )}
     </Form>
   );
 };
 
 const GetUserById = () => {
-  const [someUserId, setSomeUserId] = useState("644179e541de4d678f6a65a2");
+  const [someUserId, setSomeUserId] = useState("");
 
   const {
     data: someUser,
@@ -179,10 +189,14 @@ const GetUserById = () => {
         Szukaj
       </Button>
       {isLoading && <SmallLoading />}
-      {isError && <ErrorText>Brak użytkownika o takim id</ErrorText>}
+      {isError && someUserId && (
+        <ErrorText>Brak użytkownika o takim id</ErrorText>
+      )}
       {someUser && !isError && (
         <>
-          <PrimaryText style={{ marginTop: "2rem" }}>{someUser.name}</PrimaryText>
+          <PrimaryText style={{ marginTop: "2rem" }}>
+            {someUser.name}
+          </PrimaryText>
           <SecondaryText>{someUser.email}</SecondaryText>
         </>
       )}
