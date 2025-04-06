@@ -31,6 +31,8 @@ export default Home;
 
 const LoginForm = () => {
   const [data, setData] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
+
   const {
     mutateAsync: login,
     isLoading,
@@ -45,14 +47,14 @@ const LoginForm = () => {
       const { email, password } = data;
       await login({ email, password });
     } catch (err) {
-      console.warn("Coś poszło nie tak podczas logowania");
+      setError(err.response.data.message);
     }
   };
 
   return (
     <Form onSubmit={handleSubmit}>
       <Title>Zaloguj się</Title>
-      {isError && <ErrorText>Coś poszło nie tak</ErrorText>}
+      {isError && <ErrorText>{error}</ErrorText>}
       <Label>Adres email</Label>
       <TextInput
         type="email"
@@ -83,6 +85,7 @@ const RegisterForm = () => {
     password: "",
     passwordRepeat: "",
   });
+  const [error, setError] = useState("");
   const {
     mutateAsync: register,
     isLoading,
@@ -93,16 +96,20 @@ const RegisterForm = () => {
   });
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const { name, email, password, passwordRepeat } = data;
-    if (password != passwordRepeat) return;
-    await register({ name, email, password });
+    try {
+      e.preventDefault();
+      const { name, email, password, passwordRepeat } = data;
+      if (password != passwordRepeat) return;
+      await register({ name, email, password });
+    } catch (err) {
+      setError(err.response.data.message);
+    }
   };
 
   return (
     <Form onSubmit={handleSubmit}>
       <Title>Stwórz konto</Title>
-      {isError && <ErrorText>Coś poszło nie tak</ErrorText>}
+      {isError && <ErrorText>{error}</ErrorText>}
       <Label>Twoja nazwa</Label>
       <TextInput
         type="text"
@@ -155,7 +162,7 @@ const UserDetails = () => {
       <Button onClick={logout}>Wyloguj się</Button>
       <Link to="/tylko-dla-zalogowanych">Tylko dla zalogowanych</Link>
       {countdown > 0 ? (
-        <Label>Access token wygaśnie za: {countdown}</Label>
+        <Label>Access token wygaśnie za: {countdown}s</Label>
       ) : (
         <Label>Access token wygasł!</Label>
       )}
@@ -164,7 +171,7 @@ const UserDetails = () => {
 };
 
 const GetUserById = () => {
-  const [someUserId, setSomeUserId] = useState("");
+  const [someUserId, setSomeUserId] = useState();
 
   const {
     data: someUser,
@@ -189,7 +196,7 @@ const GetUserById = () => {
         Szukaj
       </Button>
       {isLoading && <SmallLoading />}
-      {isError && someUserId && (
+      {isError && someUser && (
         <ErrorText>Brak użytkownika o takim id</ErrorText>
       )}
       {someUser && !isError && (

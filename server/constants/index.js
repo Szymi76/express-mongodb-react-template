@@ -14,6 +14,6 @@ module.exports.VALID_PASSWORD = {
 
 module.exports.EXPIRES_IN = {
     // oba w sekundach
-    ACCESS_TOKEN: 30,
-    REFRESH_TOKEN: 120,
+    ACCESS_TOKEN: 120,
+    REFRESH_TOKEN: 1800,
 }
